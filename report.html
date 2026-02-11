@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-IDS | Virtual Security Agent</title>
+    <meta name="description"
+        content="Next-Generation AI Intrusion Detection Framework with SHAP Explainability and LLM-based Security Advisor">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🛡️</span>
+                    <div class="logo-text">
+                        <h1>AI-IDS</h1>
+                        <span class="logo-subtitle">VIRTUAL SECURITY AGENT</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">DASHBOARD</span>
+                </a>
+                <a href="#" class="nav-item" data-section="threat-logs">
+                    <span class="nav-icon">⚠️</span>
+                    <span class="nav-label">THREAT LOGS</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">SETTINGS</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">SYSTEM LIVE</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <h2 class="page-title">Next-Generation AI Intrusion Detection Framework</h2>
+                <div class="top-actions">
+                    <div class="realtime-controls" id="realtime-controls">
+                        <select id="interface-select" class="select-input small">
+                            <option value="lo">lo (Loopback)</option>
+                        </select>
+                        <button class="btn btn-realtime" id="start-capture-btn">
+                            <span class="btn-icon">▶️</span>
+                            Start Live
+                        </button>
+                        <button class="btn btn-danger-outline" id="stop-capture-btn" hidden>
+                            <span class="btn-icon">⏹️</span>
+                            Stop
+                        </button>
+                    </div>
+                    <div class="upload-trigger" id="upload-trigger">
+                        <span class="upload-icon">📁</span>
+                        <span>Upload Dataset</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Real-Time Control Panel -->
+            <section class="realtime-panel glass-card" id="realtime-panel" hidden>
+                <h3 class="panel-title">
+                    <span class="title-icon">🔴</span>
+                    REAL-TIME DETECTION
+                    <span class="live-badge" id="live-badge" hidden>LIVE</span>
+                </h3>
+                <div class="realtime-grid">
+                    <div class="realtime-config">
+                        <h4>Capture Settings</h4>
+                        <div class="form-group">
+                            <label>Network Interface</label>
+                            <select id="capture-interface" class="select-input">
+                                <option value="lo">lo (Loopback)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Model</label>
+                            <select id="realtime-model" class="select-input">
+                                <option value="rf_model_1">Random Forest</option>
+                                <option value="dt_model_1">Decision Tree</option>
+                                <option value="xgboost">XGBoost</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="attack-sim">
+                        <h4>Attack Simulation</h4>
+                        <div class="form-group">
+                            <label>Attack Type</label>
+                            <select id="attack-type" class="select-input">
+                                <option value="port_scan">Port Scan</option>
+                                <option value="syn_flood">SYN Flood</option>
+                                <option value="http_flood">HTTP Flood</option>
+                                <option value="ssh_brute">SSH Brute Force</option>
+                                <option value="udp_flood">UDP Flood</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Intensity</label>
+                            <select id="attack-intensity" class="select-input">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-danger" id="start-attack-btn">
+                            <span class="btn-icon">⚔️</span>
+                            Launch Attack
+                        </button>
+                        <button class="btn btn-secondary" id="stop-attack-btn" hidden>
+                            <span class="btn-icon">🛑</span>
+                            Stop Attack
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Cards -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <span class="stat-label">TOTAL FLOWS ANALYZED</span>
+                    <span class="stat-value" id="total-samples">0</span>
+                </div>
+                <div class="stat-card threat">
+                    <span class="stat-label">THREATS DETECTED</span>
+                    <span class="stat-value" id="threats-detected">0</span>
+                </div>
+                <div class="stat-card success">
+                    <span class="stat-label">ACCURACY</span>
+                    <span class="stat-value" id="stat-accuracy">--%</span>
+                </div>
+                <div class="stat-card info">
+                    <span class="stat-label">MODEL</span>
+                    <span class="stat-value small" id="model-name">--</span>
+                </div>
+            </section>
+
+            <!-- Configuration Panel (Hidden by default, shown on upload click) -->
+            <section class="config-panel glass-card" id="config-panel" hidden>
+                <h3 class="panel-title">
+                    <span class="title-icon">⚙️</span>
+                    Configuration
+                </h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="dataset-select">Dataset</label>
+                        <select id="dataset-select" class="select-input">
+                            <option value="">Select Dataset</option>
+                            <option value="cicids2017">CICIDS2017</option>
+                            <option value="nslkdd">NSL-KDD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="model-select">Model</label>
+                        <select id="model-select" class="select-input" disabled>
+                            <option value="">Select Model</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="upload-section">
+                    <label class="upload-label">Upload CSV File</label>
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="file-input" accept=".csv" hidden>
+                        <div class="upload-content" id="upload-content">
+                            <span class="upload-icon">📤</span>
+                            <span class="upload-text">Drag & drop or click to upload</span>
+                            <span class="upload-subtext">CSV files only</span>
+                        </div>
+                        <div class="file-info" id="file-info" hidden>
+                            <span class="file-icon">📄</span>
+                            <span class="file-name" id="file-name"></span>
+                            <button class="remove-file" id="remove-file">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="run-inference-btn" disabled>
+                        <span class="btn-icon">▶️</span>
+                        Run Analysis
+                    </button>
+                    <button class="btn btn-secondary" id="compare-models-btn" disabled>
+                        <span class="btn-icon">📊</span>
+                        Compare Models
+                    </button>
+                </div>
+            </section>
+
+            <!-- Main Dashboard Grid -->
+            <section class="dashboard-grid">
+                <!-- Live Traffic Feed -->
+                <div class="traffic-feed glass-card">
+                    <h3 class="panel-title">
+                        <span class="title-icon">📡</span>
+                        LIVE NETWORK TRAFFIC FEED
+                    </h3>
+                    <div class="traffic-console" id="traffic-console">
+                        <div class="console-line info">
+                            <span class="timestamp">[--:--:--]</span>
+                            <span class="message">Waiting for analysis...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel -->
+                <div class="right-panel">
+                    <!-- AI Explainability Panel -->
+                    <div class="xai-panel glass-card" id="explainability-panel">
+                        <h3 class="panel-title">
+                            <span class="title-icon">🔬</span>
+                            AI EXPLAINABILITY (XAI)
+                        </h3>
+                        <div class="xai-content" id="xai-content">
+                            <div class="xai-section">
+                                <div class="xai-label">
+                                    <span class="checkbox">☐</span>
+                                    AI DETECTION REASONING:
+                                </div>
+                                <p class="xai-text" id="xai-reasoning">
+                                    Run analysis to see AI detection reasoning with SHAP feature importance.
+                                </p>
+                            </div>
+                            <div class="feature-importance-mini" id="feature-importance-mini" hidden>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Advisor Panel -->
+                    <div class="advisor-panel glass-card" id="security-advisor-panel">
+                        <h3 class="panel-title">
+                            <span class="title-icon">🤖</span>
+                            SECURITY ADVISOR AGENT
+                        </h3>
+                        <div class="advisor-content" id="advisor-content">
+                            <div class="advisor-section">
+                                <div class="advisor-label">
+                                    <span class="checkbox">☐</span>
+                                    STRATEGIC DEFENSE:
+                                </div>
+                                <p class="advisor-text" id="advisor-text">
+                                    Detect threats to receive AI-powered security recommendations.
+                                </p>
+                            </div>
+                            <button class="btn btn-advisor" id="get-advice-btn" disabled>
+                                <span class="btn-icon">💡</span>
+                                Get Security Advice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Predictions Table (Hidden until results) -->
+            <section class="predictions-panel glass-card" id="results-panel" hidden>
+                <h3 class="panel-title">
+                    <span class="title-icon">📋</span>
+                    DETECTION RESULTS
+                </h3>
+
+                <!-- Metrics Grid -->
+                <div class="metrics-grid" id="metrics-grid" hidden>
+                    <div class="metric-card">
+                        <span class="metric-value" id="metric-accuracy">--%</span>
+                        <span class="metric-label">Accuracy</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="metric-precision">--%</span>
+                        <span class="metric-label">Precision</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="metric-recall">--%</span>
+                        <span class="metric-label">Recall</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="metric-f1">--%</span>
+                        <span class="metric-label">F1 Score</span>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <h4 class="chart-title">Prediction Distribution</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="distribution-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Predictions Table -->
+                <div class="table-container">
+                    <h4 class="table-title">Predictions (First 100 samples)</h4>
+                    <div class="table-wrapper">
+                        <table class="predictions-table" id="predictions-table">
+                            <thead>
+                                <tr>
+                                    <th>Sample #</th>
+                                    <th>Prediction</th>
+                                    <th>Confidence</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="predictions-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comparison Panel -->
+            <section class="comparison-panel glass-card" id="comparison-panel" hidden>
+                <h3 class="panel-title">
+                    <span class="title-icon">🔍</span>
+                    Model Comparison
+                </h3>
+                <div class="comparison-content" id="comparison-content">
+                </div>
+            </section>
+
+            <!-- Firewall Rules Section -->
+            <section class="firewall-panel glass-card" id="firewall-rules-section" hidden>
+                <h3 class="panel-title">
+                    <span class="title-icon">🔥</span>
+                    SUGGESTED FIREWALL RULES
+                </h3>
+                <pre class="firewall-code" id="firewall-rules-code"></pre>
+                <button class="btn btn-secondary" id="copy-rules-btn">
+                    <span class="btn-icon">📋</span>
+                    Copy Rules
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay" hidden>
+        <div class="loader"></div>
+        <p class="loading-text">Analyzing network traffic...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- XAI Explanation Modal -->
+    <div id="xai-modal" class="modal" hidden>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3><span class="title-icon">🔬</span> AI Explanation Analysis</h3>
+                <span class="close-modal" id="close-xai-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="xai-section">
+                    <h4>Detection Reasoning</h4>
+                    <p id="modal-xai-reasoning">Loading analysis...</p>
+                </div>
+                <div class="feature-importance-list" id="modal-feature-list">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="xai-chart-container">
+                    <img id="modal-waterfall-plot" class="xai-plot-img" hidden />
+                </div>
+
+                <div class="xai-section" id="modal-security-advice" hidden
+                    style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                    <h4><span class="icon">🛡️</span> Security Recommendations</h4>
+                    <div id="modal-advice-content"
+                        style="font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);"></div>
+                    <pre id="modal-firewall-rules" class="code-block" hidden
+                        style="margin-top: 10px; font-size: 0.8em;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
